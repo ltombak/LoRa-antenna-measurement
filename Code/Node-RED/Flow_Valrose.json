@@ -1,0 +1,292 @@
+[
+    {
+        "id": "5e0d5e08.85b118",
+        "type": "tab",
+        "label": "Flow_Valrose",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "3b3c7ae2.4b9de6",
+        "type": "inject",
+        "z": "5e0d5e08.85b118",
+        "name": "Refresh list",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "",
+        "x": 120,
+        "y": 300,
+        "wires": [
+            [
+                "d86eea02.da36"
+            ]
+        ]
+    },
+    {
+        "id": "d86eea02.da36",
+        "type": "file in",
+        "z": "5e0d5e08.85b118",
+        "name": "Read TTNMapper",
+        "filename": "PATH\\TO\\THE\\FILE",
+        "format": "lines",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "ascii",
+        "x": 130,
+        "y": 220,
+        "wires": [
+            [
+                "f15c387d.19e598"
+            ]
+        ]
+    },
+    {
+        "id": "30a231a3.e3adde",
+        "type": "debug",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "x": 930,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "5aa857ae.3b526",
+        "type": "worldmap",
+        "z": "5e0d5e08.85b118",
+        "name": "TTN Map",
+        "lat": "43.71",
+        "lon": "7.2656",
+        "zoom": "",
+        "layer": "OSM",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "Valrose",
+        "x": 780,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "f443daad.6927c",
+        "type": "function",
+        "z": "5e0d5e08.85b118",
+        "name": "Format JSON",
+        "func": "//var result = msg.payload.lat.replace(/[\\s()-]+/gi,'');\n\nvar color = \"#1E90FF\";\n\nif (msg.payload.metadata.gateways[0].rssi > -120)\n{color = \"#00ffcc\";}\nif (msg.payload.metadata.gateways[0].rssi > -110)\n{color = \"#8cff00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#ffcc00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#FF0000\";}\n\n\nreturn {payload: {   name: msg.payload.phone_time,\n                    lat: msg.payload.phone_lat,\n                    lon: msg.payload.phone_lon,\n                    icon: 'map-signs',\n                    iconColor : color,\n                    rssi : msg.payload.metadata.gateways[0].rssi,\n                    message: msg.payload.payload_raw,\n                    altitude: msg.payload.phone_alt\n                           }\n                 };\n                 \n  \n  ",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 560,
+        "y": 60,
+        "wires": [
+            [
+                "cce41f30.39b95"
+            ]
+        ]
+    },
+    {
+        "id": "f15c387d.19e598",
+        "type": "json",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 350,
+        "y": 80,
+        "wires": [
+            [
+                "f443daad.6927c"
+            ]
+        ]
+    },
+    {
+        "id": "d1562301.71d0c",
+        "type": "function",
+        "z": "5e0d5e08.85b118",
+        "name": "Distance",
+        "func": "\n//node.warn(msg.payload);\n\n\nvar rssi;\nvar snr;\nvar dev;\nvar lat1 = 43.716362;\nvar lon1 = 7.268347;\nvar lat2 = msg.payload.phone_lat;\nvar lon2 = msg.payload.phone_lon;\nvar max_dist = 0;\n\n\n// start and end are objects with latitude and longitude\n//decimals (default 2) is number of decimals in the output\n//return is distance in kilometers. \n    var decimals = 2;\n    var earthRadius = 6371; // km\n   // var lat1 = parseFloat(msg.payload.gps_1.latitude);\n \n    //var dLat = (lat2 - lat1).toRad();\n    //var dLon = (lon2 - lon1).toRad();\n    //lat1 = lat1.toRad();\n    //lat2 = lat2.toRad();\n    var dLat = (lat2 - lat1)* Math.PI / 180;\n    var dLon = (lon2 - lon1)* Math.PI / 180;\n    lat1_pi = lat1* Math.PI / 180;\n    lat2_pi = lat2* Math.PI / 180;\n    \n    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1_pi) * Math.cos(lat2_pi);\n    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n    var d = earthRadius * c;\n    var dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n   \n    rssi =  msg.payload.metadata.gateways[0].rssi;\n    snr = msg.payload.metadata.gateways[0].snr;\n    dev = msg.payload.dev_id;\n       \n        \n    \n    \n    \n\nreturn {\n    payload: {\n        time: msg.payload.phone_time,\n        rssi: rssi,\n        snr:snr,\n        dist: dist,\n        dev:dev,\n        }};\n        \n        \n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 520,
+        "y": 180,
+        "wires": [
+            [
+                "1937c207.60fd1e"
+            ]
+        ]
+    },
+    {
+        "id": "1937c207.60fd1e",
+        "type": "csv",
+        "z": "5e0d5e08.85b118",
+        "name": "To CSV",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "time,dev,dist,rssi,snr",
+        "skip": 0,
+        "x": 660,
+        "y": 240,
+        "wires": [
+            [
+                "c6191c6a.2a0dd"
+            ]
+        ]
+    },
+    {
+        "id": "c6191c6a.2a0dd",
+        "type": "file",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "filename": "PATH\\TO\\THE\\FILE",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 880,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "a65545f2.541cd",
+        "type": "function",
+        "z": "5e0d5e08.85b118",
+        "name": "Diversite",
+        "func": "\n//node.warn(msg.payload);\n\n\nvar rssi1;\nvar snr1;\nvar rssi2;\nvar snr2;\nvar dev;\nvar lat1 = 43.716362;\nvar lon1 = 7.268347;\nvar lat2 = msg.payload.phone_lat;\nvar lon2 = msg.payload.phone_lon;\nvar max_dist = 0;\n\n\n// start and end are objects with latitude and longitude\n//decimals (default 2) is number of decimals in the output\n//return is distance in kilometers. \n    var decimals = 2;\n    var earthRadius = 6371; // km\n   // var lat1 = parseFloat(msg.payload.gps_1.latitude);\n \n    //var dLat = (lat2 - lat1).toRad();\n    //var dLon = (lon2 - lon1).toRad();\n    //lat1 = lat1.toRad();\n    //lat2 = lat2.toRad();\n    var dLat = (lat2 - lat1)* Math.PI / 180;\n    var dLon = (lon2 - lon1)* Math.PI / 180;\n    lat1_pi = lat1* Math.PI / 180;\n    lat2_pi = lat2* Math.PI / 180;\n    \n    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1_pi) * Math.cos(lat2_pi);\n    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n    var d = earthRadius * c;\n    var dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n   \n    rssi1 =  msg.payload.metadata.gateways[0].rssi;\n    snr1 = msg.payload.metadata.gateways[0].snr;\n    rssi2 =  msg.payload.metadata.gateways[1].rssi;\n    snr2 = msg.payload.metadata.gateways[1].snr;\n    dev = msg.payload.dev_id;\n       \n        \n    \n    \n    \n\nreturn {\n    payload: {\n        time: msg.payload.phone_time,\n        rssi1: rssi1,\n        snr1:snr1,\n        rssi2: rssi2,\n        snr2:snr2,\n        dist: dist,\n        dev:dev,\n        }};\n        \n        \n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 400,
+        "y": 320,
+        "wires": [
+            [
+                "b515a55.9818dd8"
+            ]
+        ]
+    },
+    {
+        "id": "b515a55.9818dd8",
+        "type": "csv",
+        "z": "5e0d5e08.85b118",
+        "name": "To CSV",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "time,dev,dist,rssi1,snr1,rssi2,snr2",
+        "skip": 0,
+        "x": 460,
+        "y": 500,
+        "wires": [
+            [
+                "4e990703.4a7508"
+            ]
+        ]
+    },
+    {
+        "id": "4e990703.4a7508",
+        "type": "file",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "filename": "PATH\\TO\\THE\\FILE",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 600,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "60238fa4.78621",
+        "type": "function",
+        "z": "5e0d5e08.85b118",
+        "name": "test map",
+        "func": "msg.payload = { name:\"TEST\", lat:43.71, lon:7.26, radius:30 }\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 540,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1be9ad2c.4a5853",
+        "type": "inject",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "topic": "",
+        "payload": "",
+        "payloadType": "str",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "x": 370,
+        "y": 160,
+        "wires": [
+            [
+                "60238fa4.78621"
+            ]
+        ]
+    },
+    {
+        "id": "cce41f30.39b95",
+        "type": "worldmap",
+        "z": "5e0d5e08.85b118",
+        "name": "TEST",
+        "lat": "43.7",
+        "lon": "7.26",
+        "zoom": "14",
+        "layer": "OSM grey",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "/TEST",
+        "x": 750,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "e49f5430.ad44a8",
+        "type": "function",
+        "z": "5e0d5e08.85b118",
+        "name": "",
+        "func": "msg.payload = { lat:51.05, lon:-1.35, name:\"A3090\", radius:30 }\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 540,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    }
+]
