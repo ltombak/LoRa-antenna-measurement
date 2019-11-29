@@ -7,4 +7,4 @@ You have to change the locations of the files. Flow_Valrose.json is centered on 
 The logs are imported from the application TTNmapper. This flow is still a work in progress.
 
 The results are displayed on a map like this:
-<img src='https://github.com/LoRa-antenna-measurement\Code\Node-RED\Flow_example.PNG'>
+<img src='https://github.com/ltombak/LoRa-antenna-measurement/blob/master/Code/Node-RED/Flow_example.PNG'>
