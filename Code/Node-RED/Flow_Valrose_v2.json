@@ -1,0 +1,199 @@
+[
+    {
+        "id": "8d97decb.5293b",
+        "type": "tab",
+        "label": "Mapping_Valrose",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "d3971cf2.fb4d08",
+        "type": "inject",
+        "z": "8d97decb.5293b",
+        "name": "Refresh list",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 310,
+        "y": 140,
+        "wires": [
+            [
+                "7c3d6d37.90ff6c"
+            ]
+        ]
+    },
+    {
+        "id": "7c3d6d37.90ff6c",
+        "type": "file in",
+        "z": "8d97decb.5293b",
+        "name": "Read log ttnmapper",
+        "filename": "/media/hdd_1/documents/logs_ttn/ttnmapper-201911301458.log",
+        "format": "lines",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "ascii",
+        "x": 180,
+        "y": 320,
+        "wires": [
+            [
+                "233de8ec.fb584"
+            ]
+        ]
+    },
+    {
+        "id": "6c4bde4c.963568",
+        "type": "function",
+        "z": "8d97decb.5293b",
+        "name": "Format JSON",
+        "func": "//var result = msg.payload.lat.replace(/[\\s()-]+/gi,'');\n\nvar color = \"#1E90FF\";\n\nif (msg.payload.metadata.gateways[0].rssi > -120)\n{color = \"#00ffcc\";}\nif (msg.payload.metadata.gateways[0].rssi > -110)\n{color = \"#8cff00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#ffcc00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#FF0000\";}\n\n\nreturn {payload: {   name: msg.payload.phone_time,\n                    lat: msg.payload.phone_lat,\n                    lon: msg.payload.phone_lon,\n                    alt: msg.payload.phone_alt,\n                    icon: 'map-signs',\n                    iconColor : color,\n                    device: msg.payload.dev_id,\n                    altitude: msg.payload.phone_alt,\n                    rssi : msg.payload.metadata.gateways[0].rssi\n                           }\n                 };",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "233de8ec.fb584",
+        "type": "json",
+        "z": "8d97decb.5293b",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 390,
+        "y": 320,
+        "wires": [
+            [
+                "6c4bde4c.963568",
+                "b40a2148.af1ac8",
+                "2f00ec32.26964c"
+            ]
+        ]
+    },
+    {
+        "id": "ced4a375.a7734",
+        "type": "function",
+        "z": "8d97decb.5293b",
+        "name": "Distance Fabien",
+        "func": "var rssi;\nvar snr;\nvar dev;\nvar lat1 = 43.716362;\nvar lon1 = 7.268347;\nvar lat2 = msg.payload.phone_lat;\nvar lon2 = msg.payload.phone_lon;\nvar max_dist = 0;\n\n\n// start and end are objects with latitude and longitude\n//decimals (default 2) is number of decimals in the output\n//return is distance in kilometers. \n    var decimals = 2;\n    var earthRadius = 6371; // km\n   // var lat1 = parseFloat(msg.payload.gps_1.latitude);\n \n    //var dLat = (lat2 - lat1).toRad();\n    //var dLon = (lon2 - lon1).toRad();\n    //lat1 = lat1.toRad();\n    //lat2 = lat2.toRad();\n    var dLat = (lat2 - lat1)* Math.PI / 180;\n    var dLon = (lon2 - lon1)* Math.PI / 180;\n    lat1_pi = lat1* Math.PI / 180;\n    lat2_pi = lat2* Math.PI / 180;\n    \n    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1_pi) * Math.cos(lat2_pi);\n    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n    var d = earthRadius * c;\n    var dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n   \n    rssi =  msg.payload.metadata.gateways[0].rssi;\n    snr = msg.payload.metadata.gateways[0].snr;\n    dev = msg.payload.dev_id;\n       \n        \n    \n    \n    \n\nreturn {\n    payload: {\n        time: msg.payload.phone_time,\n        rssi: rssi,\n        snr:snr,\n        dist: dist,\n        dev:dev,\n        }};\n        \n        \n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 600,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "539a4abb.65386c",
+        "type": "worldmap",
+        "z": "8d97decb.5293b",
+        "name": "map_valrose",
+        "lat": "43.71",
+        "lon": "7.2656",
+        "zoom": "14",
+        "layer": "OSM grey",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "/valrose",
+        "x": 950,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "b40a2148.af1ac8",
+        "type": "function",
+        "z": "8d97decb.5293b",
+        "name": "Format JSON",
+        "func": "//var result = msg.payload.lat.replace(/[\\s()-]+/gi,'');\n\nvar color = \"#1E90FF\";\n\nif (msg.payload.dev_id == \"polacirc\")\n{\n    color = \"#8cff00\";\n    polarisation = \"Circulaire\";\n}\nif (msg.payload.dev_id == \"cavalierrouge2\")\n{\n    color = \"#ffcc00\";\n    polarisation = \"Verticale\";\n}\nif (msg.payload.dev_id == \"polah\")\n{   \n    color = \"#FF0000\";\n    polarisation = \"Horizontale\";\n}\n\n\n\nreturn {\n    payload:\n    {  \n        name: msg.payload.phone_time,\n        polarisation: polarisation,\n        lat: msg.payload.phone_lat,\n        lon: msg.payload.phone_lon,\n        color : color,\n        radius : 20,\n        clickable : true,\n        rssi : msg.payload.metadata.gateways[0].rssi,\n        altitude: msg.payload.phone_alt\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 280,
+        "wires": [
+            [
+                "539a4abb.65386c"
+            ]
+        ]
+    },
+    {
+        "id": "2f00ec32.26964c",
+        "type": "function",
+        "z": "8d97decb.5293b",
+        "name": "data_output",
+        "func": "var rssi_1_1;\nvar rssi_1_2;\nvar rssi_2_1;\nvar rssi_2_2;\nvar snr_1_1;\nvar snr_1_2;\nvar snr_2_1;\nvar snr_2_2;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar gtw_2_lat;\nvar gtw_2_lon;\nvar gtw_3_lat;\nvar gtw_3_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\n\nvar dev;\nvar nb_gtw;\n\nnb_gtw = msg.payload.metadata.gateways.length;\n\nif(nb_gtw == 1)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = '';\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    \n    rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_1_2 = 0;\n    rssi_2_1 = 0;\n    rssi_2_2 = 0;\n    \n    snr_1_1 = msg.payload.metadata.gateways[0].snr;\n    snr_1_2 = 0;\n    snr_2_1 = 0;\n    snr_2_2 = 0;\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n        rssi_1_2 = msg.payload.metadata.gateways[1].rssi;\n        rssi_2_1 = 0;\n        rssi_2_2 = 0;\n        \n        snr_1_1 = msg.payload.metadata.gateways[0].snr;\n        snr_1_2 = msg.payload.metadata.gateways[1].snr;\n        snr_2_1 = 0;        \n        snr_2_2 = 0;\n    }\n    else\n    {\n        rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n        rssi_2_1 = msg.payload.metadata.gateways[1].rssi;\n        rssi_1_2 = 0;\n        rssi_2_2 = 0;\n        \n        snr_1_1 = msg.payload.metadata.gateways[0].snr;\n        snr_2_1 = msg.payload.metadata.gateways[1].snr;\n        snr_1_2 = 0;\n        snr_2_2 = 0;\n    }\n}\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = 0;\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    \n    rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n    snr_1_1 = msg.payload.metadata.gateways[0].snr;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        rssi_1_2 = msg.payload.metadata.gateways[1].rssi;\n        rssi_2_1 = msg.payload.metadata.gateways[2].rssi;\n        rssi_2_2 = 0;\n        \n        snr_1_2 = msg.payload.metadata.gateways[1].snr;\n        snr_2_1 = msg.payload.metadata.gateways[2].snr;\n        snr_2_2 = 0;\n    }\n    else\n    {\n        rssi_2_1 = msg.payload.metadata.gateways[1].rssi;\n        snr_2_1 = msg.payload.metadata.gateways[1].snr;\n        \n        if(gtw_id_2 == gtw_id_3)\n        {\n            rssi_2_2 = msg.payload.metadata.gateways[2].rssi;\n            rssi_1_2 = 0;\n            \n            snr_2_2 = msg.payload.metadata.gateways[2].snr;\n            snr_1_2 = 0;\n        }\n        else\n        {\n            rssi_1_2 = msg.payload.metadata.gateways[2].rssi;\n            rssi_2_2 = 0;\n            \n            snr_1_2 = msg.payload.metadata.gateways[2].snr;\n            snr_2_2 = 0;\n        }\n    }\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist_1 =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n\nvar dist_2 = 0;\nvar dist_3 = 0;\n\n\ndev = msg.payload.dev_id;\n\n   \nreturn {\n    payload: \n    {\n        time: msg.payload.phone_time,\n        nb_gtw: nb_gtw,\n        gtw_1: gtw_id_1,\n        rssi_1_1: rssi_1_1,\n        rssi_1_2: rssi_1_2,\n        snr_1_1: snr_1_1,\n        snr_1_2: snr_1_2,\n        gtw_2: gtw_id_2,\n        rssi_2_1: rssi_2_1,\n        rssi_2_2: rssi_2_2,\n        snr_2_1: snr_2_1,\n        snr_2_2: snr_2_2,\n        gtw_3: gtw_id_3,\n        \n        dist_1: dist_1,\n        dist_2: dist_2,\n        dist_3: dist_3,\n        \n        dev: dev,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 400,
+        "wires": [
+            [
+                "bdfd23e.a0d516",
+                "7e994260.f81dfc"
+            ]
+        ]
+    },
+    {
+        "id": "bdfd23e.a0d516",
+        "type": "csv",
+        "z": "8d97decb.5293b",
+        "name": "CSV Format",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\r",
+        "temp": "time,nb_gtw,gtw_1,dist_1,rssi_1_1,snr_1_1,gtw_2,rssi_1_2,snr_1_2,gtw_3,rssi_2_1,snr_2_1,gtw_4,rssi_2_2,snr_2_2,dev",
+        "skip": 0,
+        "strings": true,
+        "x": 830,
+        "y": 400,
+        "wires": [
+            [
+                "bc16af24.3fde8"
+            ]
+        ]
+    },
+    {
+        "id": "bc16af24.3fde8",
+        "type": "file",
+        "z": "8d97decb.5293b",
+        "name": "data.csv file",
+        "filename": "/media/hdd_1/documents/output/data.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1010,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7e994260.f81dfc",
+        "type": "debug",
+        "z": "8d97decb.5293b",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 850,
+        "y": 540,
+        "wires": []
+    }
+]

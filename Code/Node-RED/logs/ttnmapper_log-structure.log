@@ -1,0 +1,120 @@
+{
+"app_id":"mappinguca",
+"counter":1,
+"dev_id":"polah",
+"hardware_serial":"1234567891000003",
+"iid":"e645b674-cd54-446a-afb8-8f3ac3070cad",
+"metadata":
+{
+  "airtime":205824000,
+  "coding_rate":"4/5",
+  "data_rate":"SF9BW125",
+  "frequency":868.1,
+  "gateways":[
+  {
+    "altitude":110,
+    "channel":0,
+    "gtw_id":"eui-60c5a8fffe74d21d",
+    "latitude":43.716362,
+    "location_source":"registry",
+    "longitude":7.2683473,
+    "rf_chain":3,
+    "rssi":-126.0,
+    "snr":-10.5,
+    "time":"",
+    "timestamp":905803731
+  },
+  {
+    "altitude":110,
+    "channel":0,
+    "gtw_id":"eui-60c5a8fffe74d21d",
+    "latitude":43.716362,
+    "location_source":"registry",
+    "longitude":7.2683473,
+    "rf_chain":1,"rssi":-125.0,
+    "snr":-10.3,
+    "time":"",
+    "timestamp":905805196
+  }],
+  "modulation":"LORA",
+  "time":"2019-11-30T14:59:03.161504815Z"
+},
+"mqtt_topic":"mappinguca/devices/polah/up",
+"payload_raw":"UG9sYV9DaXJj",
+"phone_alt":90.78143310546875,
+"phone_lat":43.70325767,
+"phone_loc_acc":3.2160000801086426,
+"phone_loc_provider":"gps",
+"phone_loc_time":"2019-11-30T14:59:05Z",
+"phone_lon":7.2494881,
+"phone_time":"2019-11-30T14:59:05Z",
+"port":3,
+"user_agent":"Android9 App20:2019.06.19b"
+}
+
+
+
+
+
+
+
+{"app_id":"mappinguca","counter":11,"dev_id":"polacirc","hardware_serial":"1234567891000002","iid":"e645b674-cd54-446a-afb8-8f3ac3070cad",
+"metadata":
+  {"airtime":205824000,
+  "coding_rate":"4/5",
+  "data_rate":"SF9BW125",
+  "frequency":868.1,
+  "gateways":[
+  {
+    "altitude":110,
+    "channel":0,
+    "gtw_id":"eui-60c5a8fffe74d21d",
+    "latitude":43.716362,
+    "location_source":"registry",
+    "longitude":7.2683473,
+    "rf_chain":3,
+    "rssi":-109.0,
+    "snr":5.3,
+    "time":"",
+    "timestamp":1555882377
+  },
+  {
+    "altitude":36,
+    "channel":2,
+    "gtw_id":"eui-60c5a8fffe71ab1c",
+    "latitude":43.552532,
+    "location_source":"registry",
+    "longitude":7.13344,
+    "rf_chain":3,
+    "rssi":-126.0,
+    "snr":-9.5,
+    "time":"2019-11-30T15:09:53.211177Z",
+    "timestamp":2929551329
+  },
+  {
+    "altitude":110,
+    "channel":0,
+    "gtw_id":"eui-60c5a8fffe74d21d",
+    "latitude":43.716362,
+    "location_source":"registry",
+    "longitude":7.2683473,
+    "rf_chain":1,
+    "rssi":-112.0,
+    "snr":2.0,
+    "time":"",
+    "timestamp":1555885316
+  }],
+  "modulation":"LORA",
+  "time":"2019-11-30T15:09:53.245016345Z"
+},
+"mqtt_topic":"mappinguca/devices/polacirc/up",
+"payload_raw":"UG9sYV9DaXJj",
+"phone_alt":104.3299560546875,
+"phone_lat":43.70316608,
+"phone_loc_acc":9.648000717163086,
+"phone_loc_provider":"gps",
+"phone_loc_time":"2019-11-30T15:09:53Z",
+"phone_lon":7.24948002,
+"phone_time":"2019-11-30T15:09:53Z",
+"port":3,
+"user_agent":"Android9 App20:2019.06.19b"}
