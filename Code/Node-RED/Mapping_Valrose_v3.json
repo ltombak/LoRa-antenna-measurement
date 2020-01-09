@@ -1,0 +1,413 @@
+[
+    {
+        "id": "6a500ff5.32cd88",
+        "type": "tab",
+        "label": "Mapping_Valrose",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "6845259d.24c61c",
+        "type": "inject",
+        "z": "6a500ff5.32cd88",
+        "name": "Refresh list",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "x": 310,
+        "y": 200,
+        "wires": [
+            [
+                "268aec.13784514"
+            ]
+        ]
+    },
+    {
+        "id": "268aec.13784514",
+        "type": "file in",
+        "z": "6a500ff5.32cd88",
+        "name": "Read log ttnmapper",
+        "filename": "/media/hdd_1/documents/logs_ttn/data_all_antenna_gw_90.txt",
+        "format": "lines",
+        "chunk": false,
+        "sendError": false,
+        "encoding": "ascii",
+        "x": 220,
+        "y": 320,
+        "wires": [
+            [
+                "573f6bed.ddfcd4"
+            ]
+        ]
+    },
+    {
+        "id": "c895bf7f.3ba3a",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "Format JSON",
+        "func": "//var result = msg.payload.lat.replace(/[\\s()-]+/gi,'');\n\nvar color = \"#1E90FF\";\n\nif (msg.payload.metadata.gateways[0].rssi > -120)\n{color = \"#00ffcc\";}\nif (msg.payload.metadata.gateways[0].rssi > -110)\n{color = \"#8cff00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#ffcc00\";}\nif (msg.payload.metadata.gateways[0].rssi > -100)\n{color = \"#FF0000\";}\n\n\nreturn {payload: {   name: msg.payload.phone_time,\n                    lat: msg.payload.phone_lat,\n                    lon: msg.payload.phone_lon,\n                    alt: msg.payload.phone_alt,\n                    icon: 'map-signs',\n                    iconColor : color,\n                    device: msg.payload.dev_id,\n                    altitude: msg.payload.phone_alt,\n                    rssi : msg.payload.metadata.gateways[0].rssi\n                           }\n                 };",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 660,
+        "y": 40,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "573f6bed.ddfcd4",
+        "type": "json",
+        "z": "6a500ff5.32cd88",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 390,
+        "y": 320,
+        "wires": [
+            [
+                "e0b70e53.82d2f8"
+            ]
+        ]
+    },
+    {
+        "id": "49613ad1.39a68c",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "Distance Fabien",
+        "func": "var rssi;\nvar snr;\nvar dev;\nvar lat1 = 43.716362;\nvar lon1 = 7.268347;\nvar lat2 = msg.payload.phone_lat;\nvar lon2 = msg.payload.phone_lon;\nvar max_dist = 0;\n\n\n// start and end are objects with latitude and longitude\n//decimals (default 2) is number of decimals in the output\n//return is distance in kilometers. \n    var decimals = 2;\n    var earthRadius = 6371; // km\n   // var lat1 = parseFloat(msg.payload.gps_1.latitude);\n \n    //var dLat = (lat2 - lat1).toRad();\n    //var dLon = (lon2 - lon1).toRad();\n    //lat1 = lat1.toRad();\n    //lat2 = lat2.toRad();\n    var dLat = (lat2 - lat1)* Math.PI / 180;\n    var dLon = (lon2 - lon1)* Math.PI / 180;\n    lat1_pi = lat1* Math.PI / 180;\n    lat2_pi = lat2* Math.PI / 180;\n    \n    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +\n            Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1_pi) * Math.cos(lat2_pi);\n    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\n    var d = earthRadius * c;\n    var dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n   \n    rssi =  msg.payload.metadata.gateways[0].rssi;\n    snr = msg.payload.metadata.gateways[0].snr;\n    dev = msg.payload.dev_id;\n       \n        \n    \n    \n    \n\nreturn {\n    payload: {\n        time: msg.payload.phone_time,\n        rssi: rssi,\n        snr:snr,\n        dist: dist,\n        dev:dev,\n        }};\n        \n        \n",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ffbd2a01.7fbdd",
+        "type": "worldmap",
+        "z": "6a500ff5.32cd88",
+        "name": "map_1_valrose",
+        "lat": "43.7165",
+        "lon": "7.2668",
+        "zoom": "18",
+        "layer": "OSM grey",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "/valrose1",
+        "x": 1140,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "4fc5b114.535ce",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "Format JSON",
+        "func": "//var result = msg.payload.lat.replace(/[\\s()-]+/gi,'');\n\nvar color = \"#1E90FF\";\n\nif (msg.payload.dev_id == \"polacirc\")\n{\n    color = \"#8cff00\";\n    polarisation = \"Circulaire\";\n}\nif (msg.payload.dev_id == \"cavalierrouge2\")\n{\n    color = \"#ffcc00\";\n    polarisation = \"Verticale\";\n}\nif (msg.payload.dev_id == \"polah\")\n{   \n    color = \"#FF0000\";\n    polarisation = \"Horizontale\";\n}\n\n\n\nreturn {\n    payload:\n    {  \n        name: msg.payload.phone_time,\n        polarisation: polarisation,\n        lat: msg.payload.phone_lat,\n        lon: msg.payload.phone_lon,\n        color : color,\n        radius : 5,\n        clickable : true,\n        rssi : msg.payload.metadata.gateways[0].rssi,\n        altitude: msg.payload.phone_alt\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 660,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4efa1e68.5c0068",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "data_sorting",
+        "func": "var rssi_1_1;\nvar rssi_1_2;\nvar rssi_2_1;\nvar rssi_2_2;\nvar snr_1_1;\nvar snr_1_2;\nvar snr_2_1;\nvar snr_2_2;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar gtw_2_lat;\nvar gtw_2_lon;\nvar gtw_3_lat;\nvar gtw_3_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\n\nvar dev;\nvar nb_gtw;\n\nnb_gtw = msg.payload.metadata.gateways.length;\n\nif(nb_gtw == 1)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = '';\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    \n    rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_1_2 = 0;\n    rssi_2_1 = 0;\n    rssi_2_2 = 0;\n    \n    snr_1_1 = msg.payload.metadata.gateways[0].snr;\n    snr_1_2 = 0;\n    snr_2_1 = 0;\n    snr_2_2 = 0;\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n        rssi_1_2 = msg.payload.metadata.gateways[1].rssi;\n        rssi_2_1 = 0;\n        rssi_2_2 = 0;\n        \n        snr_1_1 = msg.payload.metadata.gateways[0].snr;\n        snr_1_2 = msg.payload.metadata.gateways[1].snr;\n        snr_2_1 = 0;        \n        snr_2_2 = 0;\n    }\n    else\n    {\n        rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n        rssi_2_1 = msg.payload.metadata.gateways[1].rssi;\n        rssi_1_2 = 0;\n        rssi_2_2 = 0;\n        \n        snr_1_1 = msg.payload.metadata.gateways[0].snr;\n        snr_2_1 = msg.payload.metadata.gateways[1].snr;\n        snr_1_2 = 0;\n        snr_2_2 = 0;\n    }\n}\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = 0;\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    \n    rssi_1_1 = msg.payload.metadata.gateways[0].rssi;\n    snr_1_1 = msg.payload.metadata.gateways[0].snr;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        rssi_1_2 = msg.payload.metadata.gateways[1].rssi;\n        rssi_2_1 = msg.payload.metadata.gateways[2].rssi;\n        rssi_2_2 = 0;\n        \n        snr_1_2 = msg.payload.metadata.gateways[1].snr;\n        snr_2_1 = msg.payload.metadata.gateways[2].snr;\n        snr_2_2 = 0;\n    }\n    else\n    {\n        rssi_2_1 = msg.payload.metadata.gateways[1].rssi;\n        snr_2_1 = msg.payload.metadata.gateways[1].snr;\n        \n        if(gtw_id_2 == gtw_id_3)\n        {\n            rssi_2_2 = msg.payload.metadata.gateways[2].rssi;\n            rssi_1_2 = 0;\n            \n            snr_2_2 = msg.payload.metadata.gateways[2].snr;\n            snr_1_2 = 0;\n        }\n        else\n        {\n            rssi_1_2 = msg.payload.metadata.gateways[2].rssi;\n            rssi_2_2 = 0;\n            \n            snr_1_2 = msg.payload.metadata.gateways[2].snr;\n            snr_2_2 = 0;\n        }\n    }\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist_1 =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n\nvar dist_2 = 0;\nvar dist_3 = 0;\n\n\ndev = msg.payload.dev_id;\n\n   \nreturn {\n    payload: \n    {\n        time: msg.payload.phone_time,\n        nb_gtw: nb_gtw,\n        gtw_1: gtw_id_1,\n        rssi_1_1: rssi_1_1,\n        rssi_1_2: rssi_1_2,\n        snr_1_1: snr_1_1,\n        snr_1_2: snr_1_2,\n        gtw_2: gtw_id_2,\n        rssi_2_1: rssi_2_1,\n        rssi_2_2: rssi_2_2,\n        snr_2_1: snr_2_1,\n        snr_2_2: snr_2_2,\n        gtw_3: gtw_id_3,\n        \n        dist_1: dist_1,\n        dist_2: dist_2,\n        dist_3: dist_3,\n        \n        dev: dev,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 650,
+        "y": 740,
+        "wires": [
+            [
+                "77fa741a.2f461c"
+            ]
+        ]
+    },
+    {
+        "id": "77fa741a.2f461c",
+        "type": "csv",
+        "z": "6a500ff5.32cd88",
+        "name": "CSV Format",
+        "sep": ",",
+        "hdrin": true,
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\r",
+        "temp": "time,nb_gtw,gtw_1,dist_1,rssi_1_1,snr_1_1,gtw_2,rssi_1_2,snr_1_2,gtw_3,rssi_2_1,snr_2_1,gtw_4,rssi_2_2,snr_2_2,dev",
+        "skip": 0,
+        "strings": true,
+        "x": 860,
+        "y": 740,
+        "wires": [
+            [
+                "64a5de1.af3f32"
+            ]
+        ]
+    },
+    {
+        "id": "64a5de1.af3f32",
+        "type": "file",
+        "z": "6a500ff5.32cd88",
+        "name": "data.csv file",
+        "filename": "C:\\Users\\Lionel\\Documents\\0_cloud\\05. MASTER\\02. S1\\Projet Antenne\\03 logs ttn mapper\\output\\data.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1040,
+        "y": 740,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "7b5b07d2.cbd7f",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "data_sorting_v2",
+        "func": "var rssi_1;\nvar rssi_2;\nvar rssi_3;\nvar rssi_4;\nvar snr_1;\nvar snr_2;\nvar snr_3;\nvar snr_4;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar gtw_2_lat;\nvar gtw_2_lon;\nvar gtw_3_lat;\nvar gtw_3_lon;\nvar gtw_4_lat;\nvar gtw_4_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\n\nvar dev;\nvar nb_gtw;\n\nnb_gtw = msg.payload.metadata.gateways.length;\n\nif(nb_gtw == 1)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = '';\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = '';\n    gtw_2_lon = '';\n    gtw_3_lat = '';\n    gtw_3_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = 0;\n    rssi_3 = 0;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = 0;\n    snr_3 = 0;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = '';\n    gtw_3_lon = '';\n    gtw_4_lat = '';\n    gtw_4_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = 0;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = 0;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    gtw_4_lat = '';\n    gtw_4_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = msg.payload.metadata.gateways[2].rssi;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = msg.payload.metadata.gateways[2].snr;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 4)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = msg.payload.metadata.gateways[3].gtw_id;\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    gtw_4_lat = msg.payload.metadata.gateways[3].latitude;\n    gtw_4_lon = msg.payload.metadata.gateways[3].longitude;\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = msg.payload.metadata.gateways[2].rssi;\n    rssi_4 = msg.payload.metadata.gateways[3].rssi;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = msg.payload.metadata.gateways[2].snr;\n    snr_4 = msg.payload.metadata.gateways[3].snr;\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist_1 =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n\nvar dist_2 = 0;\nvar dist_3 = 0;\nvar dist_4 = 0;\n\ndev = msg.payload.dev_id;\n\n   \nreturn {\n    payload: \n    {\n        time: msg.payload.phone_time,\n        nb_gtw: nb_gtw,\n        gtw_1: gtw_id_1,\n        rssi_1: rssi_1,\n        snr_1: snr_1,\n        dist_1: dist_1,\n        gtw_2: gtw_id_2,\n        rssi_2: rssi_2,\n        snr_2: snr_2,\n        dist_2: dist_2,\n        gtw_3: gtw_id_3,\n        rssi_3: rssi_3,\n        snr_3: snr_3,\n        dist_3: dist_3,\n        gtw_4: gtw_id_4,\n        rssi_4: rssi_4,\n        snr_4: snr_4,\n        dist_4: dist_4,\n        dev: dev,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 650,
+        "y": 800,
+        "wires": [
+            [
+                "63fa72af.9423ec"
+            ]
+        ]
+    },
+    {
+        "id": "63fa72af.9423ec",
+        "type": "csv",
+        "z": "6a500ff5.32cd88",
+        "name": "CSV Format",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "time,dev,nb_gtw,gtw_1,rssi_1,snr_1,dist_1,gtw_2,rssi_2,snr_2,dist_2,gtw_3,rssi_3,snr_3,dist_3,gtw_4,rssi_4,snr_4,dist_4",
+        "skip": 0,
+        "strings": true,
+        "x": 860,
+        "y": 800,
+        "wires": [
+            [
+                "d73e6b54.146ae8"
+            ]
+        ]
+    },
+    {
+        "id": "d73e6b54.146ae8",
+        "type": "file",
+        "z": "6a500ff5.32cd88",
+        "name": "data.csv file",
+        "filename": "C:\\Users\\Lionel\\Documents\\0_cloud\\05. MASTER\\02. S1\\Projet Antenne\\03 logs ttn mapper\\output\\out_all_data_test.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "x": 1040,
+        "y": 800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4c5340d8.aa8978",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "data_sorting_v3",
+        "func": "var rssi_1;\nvar rssi_2;\nvar rssi_3;\nvar rssi_4;\nvar snr_1;\nvar snr_2;\nvar snr_3;\nvar snr_4;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar gtw_2_lat;\nvar gtw_2_lon;\nvar gtw_3_lat;\nvar gtw_3_lon;\nvar gtw_4_lat;\nvar gtw_4_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\n\nvar dev;\nvar nb_gtw;\n\nnb_gtw = msg.payload.metadata.gateways.length;\n\nif(nb_gtw == 1)\n{\n    if(msg.payload.metadata.gateways[0].gtw_id == 'eui-60c5a8fffe74d21d')\n    {\n        gtw_id_1 = 'Valrose';\n        gtw_id_2 = '';\n        gtw_id_3 = '';\n        gtw_id_4 = '';\n    }\n    if(msg.payload.metadata.gateways[0].gtw_id == 'eui-60c5a8fffe71ab1c')\n    {\n        gtw_id_1 = '';\n        gtw_id_2 = '';\n        gtw_id_3 = 'Antibes';\n        gtw_id_4 = '';\n    }\n    else\n    {\n        gtw_id_1 = '';\n        gtw_id_2 = '';\n        gtw_id_3 = '';\n        gtw_id_4 = '';\n    }\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = '';\n    gtw_2_lon = '';\n    gtw_3_lat = '';\n    gtw_3_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = 0;\n    rssi_3 = 0;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = 0;\n    snr_3 = 0;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = '';\n    gtw_id_4 = '';\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            gtw_id_1 = 'Valrose';\n            gtw_id_2 = 'Valrose';\n            gtw_id_3 = '';\n            gtw_id_4 = '';\n        }\n        if(gtw_id_1 == 'eui-60c5a8fffe71ab1c')\n        {\n            gtw_id_1 = '';\n            gtw_id_2 = '';\n            gtw_id_3 = 'Antibes';\n            gtw_id_4 = 'Antibes';\n        }\n        else\n        {\n            gtw_id_1 = '';\n            gtw_id_2 = '';\n            gtw_id_3 = '';\n            gtw_id_4 = '';\n        }\n    }\n    \n    \n    \n    \n    \n    \n    \n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = '';\n    gtw_3_lon = '';\n    gtw_4_lat = '';\n    gtw_4_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = 0;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = 0;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = '';\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    gtw_4_lat = '';\n    gtw_4_lon = '';\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = msg.payload.metadata.gateways[2].rssi;\n    rssi_4 = 0;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = msg.payload.metadata.gateways[2].snr;\n    snr_4 = 0;\n}\n\nif(nb_gtw == 4)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = msg.payload.metadata.gateways[3].gtw_id;\n    \n    gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n    gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n    gtw_2_lat = msg.payload.metadata.gateways[1].latitude;\n    gtw_2_lon = msg.payload.metadata.gateways[1].longitude;\n    gtw_3_lat = msg.payload.metadata.gateways[2].latitude;\n    gtw_3_lon = msg.payload.metadata.gateways[2].longitude;\n    gtw_4_lat = msg.payload.metadata.gateways[3].latitude;\n    gtw_4_lon = msg.payload.metadata.gateways[3].longitude;\n    \n    rssi_1 = msg.payload.metadata.gateways[0].rssi;\n    rssi_2 = msg.payload.metadata.gateways[1].rssi;\n    rssi_3 = msg.payload.metadata.gateways[2].rssi;\n    rssi_4 = msg.payload.metadata.gateways[3].rssi;\n    \n    snr_1 = msg.payload.metadata.gateways[0].snr;\n    snr_2 = msg.payload.metadata.gateways[1].snr;\n    snr_3 = msg.payload.metadata.gateways[2].snr;\n    snr_4 = msg.payload.metadata.gateways[3].snr;\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist_1 =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n\nvar dist_2 = 0;\nvar dist_3 = 0;\nvar dist_4 = 0;\n\ndev = msg.payload.dev_id;\n\n   \nreturn {\n    payload: \n    {\n        time: msg.payload.phone_time,\n        nb_gtw: nb_gtw,\n        gtw_1: gtw_id_1,\n        rssi_1: rssi_1,\n        snr_1: snr_1,\n        dist_1: dist_1,\n        gtw_2: gtw_id_2,\n        rssi_2: rssi_2,\n        snr_2: snr_2,\n        dist_2: dist_2,\n        gtw_3: gtw_id_3,\n        rssi_3: rssi_3,\n        snr_3: snr_3,\n        dist_3: dist_3,\n        gtw_4: gtw_id_4,\n        rssi_4: rssi_4,\n        snr_4: snr_4,\n        dist_4: dist_4,\n        dev: dev,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "dbeb0414.d7ca4",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "data_sorting_valrose",
+        "func": "var rssi_1;\nvar rssi_2;\nvar snr_1;\nvar snr_2;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\nvar id_antenna_1;\nvar id_antenna_2;\n\nvar nb_gtw;\nvar nb_ant;\n\nnb_gtw = msg.payload.metadata.gateways.length;\nnb_ant = 0;\nid_antenna_1 = '';\nid_antenna_2 = '';\n\nif(nb_gtw == 1)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    \n    if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n    {\n        nb_ant = 1;\n        \n        rssi_1 = msg.payload.metadata.gateways[0].rssi;\n        snr_1 = msg.payload.metadata.gateways[0].snr;\n        rssi_2 = '';\n        snr_2 = '';\n        \n        gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n        gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n        \n        id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n    }\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        nb_ant = 2;\n        \n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            rssi_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_2 = msg.payload.metadata.gateways[1].rssi;\n            snr_2 = msg.payload.metadata.gateways[1].snr;\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            id_antenna_2 = msg.payload.metadata.gateways[1].rf_chain;\n        }\n    }\n    else\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_2 = '';\n            snr_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n        }\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_1 = msg.payload.metadata.gateways[1].rssi;\n            snr_1 = msg.payload.metadata.gateways[1].snr;\n            rssi_2 = '';\n            snr_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n        }\n    }\n}\n\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = '';\n    \n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            rssi_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_2 = msg.payload.metadata.gateways[1].rssi;\n            snr_2 = msg.payload.metadata.gateways[1].snr;\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            id_antenna_2 = msg.payload.metadata.gateways[1].rf_chain;\n        }\n    }\n    else if(gtw_id_1 == gtw_id_3)\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            \n            rssi_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_2 = msg.payload.metadata.gateways[2].rssi;\n            snr_2 = msg.payload.metadata.gateways[2].snr;\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            id_antenna_2 = msg.payload.metadata.gateways[2].rf_chain;\n        }\n    }\n    else if(gtw_id_2 == gtw_id_3)\n    {\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            \n            rssi_1 = msg.payload.metadata.gateways[1].rssi;\n            snr_1 = msg.payload.metadata.gateways[1].snr;\n            rssi_2 = msg.payload.metadata.gateways[2].rssi;\n            snr_2 = msg.payload.metadata.gateways[2].snr;\n        \n            gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n            id_antenna_2 = msg.payload.metadata.gateways[2].rf_chain;\n        }\n    }\n    else\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_2 = '';\n            snr_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n        }\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_1 = msg.payload.metadata.gateways[1].rssi;\n            snr_1 = msg.payload.metadata.gateways[1].snr;\n            rssi_2 = '';\n            snr_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n        }\n        if(gtw_id_3 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_1 = msg.payload.metadata.gateways[2].rssi;\n            snr_1 = msg.payload.metadata.gateways[2].snr;\n            rssi_2 = '';\n            snr_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[2].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[2].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[2].rf_chain;\n        }\n    }\n}\n\nif(nb_gtw == 4)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = msg.payload.metadata.gateways[3].gtw_id;\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n   \nreturn {\n    payload: \n    {\n        dev_id: msg.payload.dev_id,\n        time: msg.payload.phone_time,\n        cnt: msg.payload.counter,\n        nb_gtw: nb_gtw,\n        nb_ant: nb_ant,\n        id_ant_1: id_antenna_1,\n        id_ant_2: id_antenna_2,\n        rssi_1: rssi_1,\n        snr_1: snr_1,\n        rssi_2: rssi_2,\n        snr_2: snr_2,\n        dist: dist,\n        lat: dev_lat,\n        lon: dev_lon,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 620,
+        "y": 380,
+        "wires": [
+            [
+                "90aec4ed.6b8e28",
+                "bbb69ab9.148d48",
+                "3e2dc844.24432"
+            ]
+        ]
+    },
+    {
+        "id": "9a13f6e3.a86ef8",
+        "type": "csv",
+        "z": "6a500ff5.32cd88",
+        "name": "CSV Format",
+        "sep": ",",
+        "hdrin": false,
+        "hdrout": false,
+        "multi": "one",
+        "ret": "\\r",
+        "temp": "time,dev_id,cnt,nb_gtw,nb_ant,rf_chain_1,rf_chain_2,rssi_ant_1,snr_ant_1,rssi_ant_2,snr_ant_2,dist",
+        "skip": 0,
+        "strings": true,
+        "x": 890,
+        "y": 440,
+        "wires": [
+            [
+                "a77e5217.571c78"
+            ]
+        ]
+    },
+    {
+        "id": "a77e5217.571c78",
+        "type": "file",
+        "z": "6a500ff5.32cd88",
+        "name": "data csv file",
+        "filename": "/media/hdd_1/documents/logs_ttn/refchain.csv",
+        "appendNewline": true,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "utf8",
+        "x": 1070,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "90aec4ed.6b8e28",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "polah",
+        "func": "var rssi;\nvar color = \"#000000\";\n\nif(msg.payload.dev_id == \"polah\")\n{\n    if(msg.payload.nb_ant == 1)\n    {\n        rssi = msg.payload.rssi_1;\n    }\n    if(msg.payload.nb_ant == 2)\n    {\n        rssi = Math.min(msg.payload.rssi_1,msg.payload.rssi_1)\n    }\n\n    if (rssi > -120)\n    {color = \"#440154FF\";}\n    if (rssi > -110)\n    {color = \"#39568CFF\";}\n    if (rssi > -100)\n    {color = \"#1F968BFF\";}\n    if (rssi > -90)\n    {color = \"#73D055FF\";}\n    if (rssi > -80)\n    {color = \"#FDE725FF\";}\n\n\n    return{\n            payload:\n            {\n                name: msg.payload.time,\n                lat: msg.payload.lat,\n                lon: msg.payload.lon,\n                icon: 'map-signs',\n                iconColor : color,\n                device: msg.payload.dev_id,\n                rssi : rssi,\n                rssi_1: msg.payload.rssi_1,\n                rssi_2: msg.payload.rssi_2,\n            }\n    };\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 890,
+        "y": 220,
+        "wires": [
+            [
+                "ffbd2a01.7fbdd"
+            ]
+        ]
+    },
+    {
+        "id": "bbb69ab9.148d48",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "polav",
+        "func": "var rssi;\nvar color = \"#00000000\";\n\nif(msg.payload.dev_id == \"polav\")\n{\n    if(msg.payload.nb_ant == 1)\n    {\n        rssi = msg.payload.rssi_1;\n    }\n    if(msg.payload.nb_ant == 2)\n    {\n        rssi = Math.min(msg.payload.rssi_1,msg.payload.rssi_1)\n    }\n\n    if (rssi > -120)\n    {color = \"#440154FF\";}\n    if (rssi > -110)\n    {color = \"#39568CFF\";}\n    if (rssi > -100)\n    {color = \"#1F968BFF\";}\n    if (rssi > -90)\n    {color = \"#73D055FF\";}\n    if (rssi > -80)\n    {color = \"#FDE725FF\";}\n\n\n    return{\n            payload:\n            {\n                name: msg.payload.time,\n                lat: msg.payload.lat,\n                lon: msg.payload.lon,\n                icon: 'map-signs',\n                iconColor : color,\n                device: msg.payload.dev_id,\n                rssi : rssi,\n                rssi_1: msg.payload.rssi_1,\n                rssi_2: msg.payload.rssi_2,\n            }\n    };\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 890,
+        "y": 260,
+        "wires": [
+            [
+                "42a7d1a.8d951b"
+            ]
+        ]
+    },
+    {
+        "id": "3e2dc844.24432",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "polacirc",
+        "func": "var rssi;\nvar color = \"#000000\";\n\nif(msg.payload.dev_id == \"polacirc\")\n{\n    if(msg.payload.nb_ant == 1)\n    {\n        rssi = msg.payload.rssi_1;\n    }\n    if(msg.payload.nb_ant == 2)\n    {\n        rssi = Math.min(msg.payload.rssi_1,msg.payload.rssi_1)\n    }\n\n    if (rssi > -120)\n    {color = \"#440154FF\";}\n    if (rssi > -110)\n    {color = \"#39568CFF\";}\n    if (rssi > -100)\n    {color = \"#1F968BFF\";}\n    if (rssi > -90)\n    {color = \"#73D055FF\";}\n    if (rssi > -80)\n    {color = \"#FDE725FF\";}\n\n\n    return{\n            payload:\n            {\n                name: msg.payload.time,\n                lat: msg.payload.lat,\n                lon: msg.payload.lon,\n                icon: 'map-signs',\n                iconColor : color,\n                device: msg.payload.dev_id,\n                rssi : rssi,\n                rssi_1: msg.payload.rssi_1,\n                rssi_2: msg.payload.rssi_2,\n            }\n    };\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 900,
+        "y": 300,
+        "wires": [
+            [
+                "618e87f3.a65708"
+            ]
+        ]
+    },
+    {
+        "id": "42a7d1a.8d951b",
+        "type": "worldmap",
+        "z": "6a500ff5.32cd88",
+        "name": "map_2_valrose",
+        "lat": "43.7165",
+        "lon": "7.2668",
+        "zoom": "18",
+        "layer": "OSM grey",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "/valrose2",
+        "x": 1140,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "618e87f3.a65708",
+        "type": "worldmap",
+        "z": "6a500ff5.32cd88",
+        "name": "map_3_valrose",
+        "lat": "43.7165",
+        "lon": "7.2668",
+        "zoom": "18",
+        "layer": "OSM grey",
+        "cluster": "",
+        "maxage": "",
+        "usermenu": "show",
+        "layers": "show",
+        "panit": "false",
+        "panlock": "false",
+        "zoomlock": "false",
+        "hiderightclick": "false",
+        "coords": "none",
+        "showgrid": "false",
+        "path": "/valrose3",
+        "x": 1140,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "e0b70e53.82d2f8",
+        "type": "function",
+        "z": "6a500ff5.32cd88",
+        "name": "data_sorting_valrose_rfchain",
+        "func": "var rssi_ant_1;\nvar rssi_ant_2;\nvar snr_ant_1;\nvar snr_ant_2;\nvar gtw_id_1;\nvar gtw_id_2;\nvar gtw_id_3;\nvar gtw_id_4;\nvar gtw_1_lat;\nvar gtw_1_lon;\nvar dev_lat = msg.payload.phone_lat;\nvar dev_lon = msg.payload.phone_lon;\nvar id_antenna_1;\nvar id_antenna_2;\nvar rf_chain_1;//n'est censé contenir que '1', permet de vérifier s'il y a des erreurs\nvar rf_chain_2;//n'est censé contenir que '3', permet de vérifier s'il y a des erreurs\n\nvar nb_gtw;\nvar nb_ant;\n\nnb_gtw = msg.payload.metadata.gateways.length;\nnb_ant = 0;\nid_antenna_1 = '';\nid_antenna_2 = '';\n\nrf_chain_1 = '';\nrf_chain_2 = '';\n\nif(nb_gtw == 1)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    \n    if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n    {\n        nb_ant = 1;\n        id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n        \n        if(id_antenna_1 == '1')\n        {\n            rf_chain_1 = msg.payload.metadata.gateways[0].rf_chain;\n        \n            rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_ant_2 = '';\n            snr_ant_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n        }\n        else\n        {\n            rf_chain_2 = msg.payload.metadata.gateways[0].rf_chain;\n        \n            rssi_ant_1 = '';\n            snr_ant_1 = '';\n            rssi_ant_2 = msg.payload.metadata.gateways[0].rssi;\n            snr_ant_2 = msg.payload.metadata.gateways[0].snr;\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n        }\n        \n    }\n}\n\nif(nb_gtw == 2)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        nb_ant = 2;\n        \n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            id_antenna_2 = msg.payload.metadata.gateways[1].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[0].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[1].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[1].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n            else\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[1].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[0].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[1].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[0].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n        }\n    }\n    else\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                nb_ant = 1;\n                rf_chain_1 = msg.payload.metadata.gateways[0].rf_chain;\n        \n                rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n                rssi_ant_2 = '';\n                snr_ant_2 = '';\n        \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n            else\n            {\n                rf_chain_2 = msg.payload.metadata.gateways[0].rf_chain;\n        \n                rssi_ant_1 = '';\n                snr_ant_1 = '';\n                rssi_ant_2 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[0].snr;\n        \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n        }\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                nb_ant = 1;\n                rf_chain_1 = msg.payload.metadata.gateways[1].rf_chain;\n        \n                rssi_ant_1 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[1].snr;\n                rssi_ant_2 = '';\n                snr_ant_2 = '';\n        \n                gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            }\n            else\n            {\n                rf_chain_2 = msg.payload.metadata.gateways[1].rf_chain;\n        \n                rssi_ant_1 = '';\n                snr_ant_1 = '';\n                rssi_ant_2 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[1].snr;\n        \n                gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            }\n        }\n    }\n}\n\nif(nb_gtw == 3)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = '';\n    \n    \n    if(gtw_id_1 == gtw_id_2)\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[0].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[1].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[1].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n            else\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[1].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[0].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[1].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[0].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n        }\n    }\n    else if(gtw_id_1 == gtw_id_3)\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[0].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[2].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[2].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[2].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n            else\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[2].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[0].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[2].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[2].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[0].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[0].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            }\n        }\n    }\n    else if(gtw_id_2 == gtw_id_3)\n    {\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 2;\n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n            \n            if(id_antenna_1 == '1')\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[1].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[2].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[1].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[2].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[2].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            }\n            else\n            {\n                rf_chain_1 = msg.payload.metadata.gateways[2].rf_chain;\n                rf_chain_2 = msg.payload.metadata.gateways[1].rf_chain;\n                \n                rssi_ant_1 = msg.payload.metadata.gateways[2].rssi;\n                snr_ant_1 = msg.payload.metadata.gateways[2].snr;\n                rssi_ant_2 = msg.payload.metadata.gateways[1].rssi;\n                snr_ant_2 = msg.payload.metadata.gateways[1].snr;\n                \n                gtw_1_lat = msg.payload.metadata.gateways[2].latitude;\n                gtw_1_lon = msg.payload.metadata.gateways[2].longitude;\n            }\n        }\n    }\n    else\n    {\n        if(gtw_id_1 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_ant_1 = msg.payload.metadata.gateways[0].rssi;\n            snr_ant_1 = msg.payload.metadata.gateways[0].snr;\n            rssi_ant_2 = '';\n            snr_ant_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[0].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[0].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[0].rf_chain;\n        }\n        if(gtw_id_2 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_ant_1 = msg.payload.metadata.gateways[1].rssi;\n            snr_ant_1 = msg.payload.metadata.gateways[1].snr;\n            rssi_ant_2 = '';\n            snr_ant_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[1].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[1].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[1].rf_chain;\n        }\n        if(gtw_id_3 == 'eui-60c5a8fffe74d21d')\n        {\n            nb_ant = 1;\n            \n            rssi_ant_1 = msg.payload.metadata.gateways[2].rssi;\n            snr_ant_1 = msg.payload.metadata.gateways[2].snr;\n            rssi_ant_2 = '';\n            snr_ant_2 = '';\n        \n            gtw_1_lat = msg.payload.metadata.gateways[2].latitude;\n            gtw_1_lon = msg.payload.metadata.gateways[2].longitude;\n            \n            id_antenna_1 = msg.payload.metadata.gateways[2].rf_chain;\n        }\n    }\n}\n\nif(nb_gtw == 4)\n{\n    gtw_id_1 = msg.payload.metadata.gateways[0].gtw_id;\n    gtw_id_2 = msg.payload.metadata.gateways[1].gtw_id;\n    gtw_id_3 = msg.payload.metadata.gateways[2].gtw_id;\n    gtw_id_4 = msg.payload.metadata.gateways[3].gtw_id;\n}\n   \n\n\n\nvar max_dist = 0;\nvar decimals = 2;\nvar earthRadius = 6371; // km\n\nvar dist_1_Lat = (dev_lat - gtw_1_lat)* Math.PI / 180;\nvar dist_1_Lon = (dev_lon - gtw_1_lon)* Math.PI / 180;\nvar gtw_1_lat_pi = gtw_1_lat* Math.PI / 180;\nvar dev_lat_pi = dev_lat* Math.PI / 180;\n\n    \nvar a = Math.sin(dist_1_Lat / 2) * Math.sin(dist_1_Lat / 2) + Math.sin(dist_1_Lon / 2) * Math.sin(dist_1_Lon / 2) * Math.cos(gtw_1_lat_pi) * Math.cos(dev_lat_pi);\nvar c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));\nvar d = earthRadius * c;\nvar dist =  Math.round(d * Math.pow(10, decimals)) / Math.pow(10, decimals);\n\n\n\n   \nreturn {\n    payload: \n    {\n        dev_id: msg.payload.dev_id,\n        time: msg.payload.phone_time,\n        cnt: msg.payload.counter,\n        nb_gtw: nb_gtw,\n        nb_ant: nb_ant,\n        rf_chain_1: rf_chain_1,\n        rf_chain_2: rf_chain_2,\n        rssi_ant_1: rssi_ant_1,\n        snr_ant_1: snr_ant_1,\n        rssi_ant_2: rssi_ant_2,\n        snr_ant_2: snr_ant_2,\n        dist: dist,\n        lat: dev_lat,\n        lon: dev_lon,\n    }\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 650,
+        "y": 440,
+        "wires": [
+            [
+                "9a13f6e3.a86ef8"
+            ]
+        ]
+    }
+]
